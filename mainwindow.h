@@ -23,10 +23,12 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    QLabel *errorLoadingFMsg;
     QSize windowSize;
     QString userIniFilename;
     inline void centerAndResize();
     inline void errorLoadingFileMsg();
+    void resizeEvent(QResizeEvent*) override;
 };
 
 #endif // MAINWINDOW_H
