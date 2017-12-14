@@ -2,6 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QSize>
+#include <QWindow>
+#include <QDesktopWidget>
 
 namespace Ui {
 class MainWindow;
@@ -17,6 +20,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    void centerAndResize();
 };
 
 #endif // MAINWINDOW_H
