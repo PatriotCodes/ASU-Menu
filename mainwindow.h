@@ -1,10 +1,13 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "filewriter.h"
+#include <QDesktopWidget>
+#include <QLabel>
 #include <QMainWindow>
 #include <QSize>
 #include <QWindow>
-#include <QDesktopWidget>
+
 
 namespace Ui {
 class MainWindow;
@@ -20,7 +23,10 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    void centerAndResize();
+    QSize windowSize;
+    QString userIniFilename;
+    inline void centerAndResize();
+    inline void errorLoadingFileMsg();
 };
 
 #endif // MAINWINDOW_H
