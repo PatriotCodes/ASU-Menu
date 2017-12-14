@@ -33,7 +33,7 @@ inline void MainWindow::centerAndResize() {
     );
 }
 
-void MainWindow::errorLoadingFileMsg() {
+inline void MainWindow::errorLoadingFileMsg() {
     QLabel *label = new QLabel(this);
     QFont f("Helvetica", 10, QFont::Bold);
     label->setFont(f);
