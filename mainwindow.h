@@ -2,9 +2,12 @@
 #define MAINWINDOW_H
 
 #include "filewriter.h"
+#include "iniparser.h"
+#include "inisection.h"
 #include <QDesktopWidget>
 #include <QDir>
 #include <QLabel>
+#include <QList>
 #include <QMainWindow>
 #include <QSize>
 #include <QWindow>

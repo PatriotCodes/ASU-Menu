@@ -2,12 +2,12 @@
 #define INISECTION_H
 
 #include <QString>
-#include <QStringList>
+#include <QMap>
 
 
 struct IniSection {
     QString sectionName;
-    QStringList itemList;
+    QMap<QString, QString> itemList;
 };
 
 #endif // INISECTION_H

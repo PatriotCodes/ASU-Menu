@@ -3,44 +3,47 @@
 FileWriter::FileWriter()
 {}
 
-void FileWriter::append(QFile* file, QString message)
+void FileWriter::append(QString filePath, QString message)
 {
-    if(file->open(QIODevice::WriteOnly | QIODevice::Append))
+    QFile file(filePath);
+    if(file.open(QIODevice::WriteOnly | QIODevice::Append))
     {
-        QTextStream outStream(file);
+        QTextStream outStream(&file);
         outStream << message;
-        file->close();
+        file.close();
     }
 }
 
-void FileWriter::write(QFile* file, QString message)
+void FileWriter::write(QString filePath, QString message)
 {
-    if(file->open(QIODevice::WriteOnly))
+    QFile file(filePath);
+    if(file.open(QIODevice::WriteOnly))
     {
-        QTextStream outStream(file);
+        QTextStream outStream(&file);
         outStream << message;
-        file->close();
+        file.close();
     }
 }
 
-QStringList FileWriter::read(QFile* file)
+QStringList FileWriter::read(QString filePath)
 {
+    QFile file(filePath);
     QStringList result;
-    if (file->open(QIODevice::ReadOnly))
+    if (file.open(QIODevice::ReadOnly))
     {
-        QTextStream in(file);
+        QTextStream in(&file);
         while (!in.atEnd())
         {
             QString line = in.readLine();
             result.append(line);
         }
-        file->close();
+        file.close();
     }
     return result;
 }
 
-bool FileWriter::exists(QString path)
+bool FileWriter::exists(QString filePath)
 {
-    QFileInfo checkFile(path);
+    QFileInfo checkFile(filePath);
     return (checkFile.exists() && checkFile.isFile());
 }

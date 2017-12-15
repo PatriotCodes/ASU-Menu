@@ -15,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent) :
     if (!FileWriter::exists(userIniFilename)) {
         errorLoadingFileMsg();
     }
+    QList<IniSection> iniSections = IniParser::parse(userIniFilename);
+    qDebug();
 }
 
 MainWindow::~MainWindow()
