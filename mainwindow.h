@@ -3,11 +3,14 @@
 
 #include "filewriter.h"
 #include <QDesktopWidget>
+#include <QDir>
 #include <QLabel>
 #include <QMainWindow>
 #include <QSize>
 #include <QWindow>
 
+#include <QDebug>
+#include <QSettings>
 
 namespace Ui {
 class MainWindow;
@@ -23,7 +26,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    QLabel *errorLoadingFMsg;
+    QLabel *errorLoadingFileLabel;
     QSize windowSize;
     QString userIniFilename;
     inline void centerAndResize();

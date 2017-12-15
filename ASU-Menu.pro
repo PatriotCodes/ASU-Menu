@@ -27,11 +27,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    filewriter.cpp
+    filewriter.cpp \
+    iniparser.cpp
 
 HEADERS += \
         mainwindow.h \
-    filewriter.h
+    filewriter.h \
+    iniparser.h \
+    inisection.h
 
 FORMS += \
         mainwindow.ui
