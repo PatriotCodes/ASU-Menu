@@ -78,9 +78,10 @@ inline void MainWindow::addButtonAction(QPushButton *button, QString action) {
 }
 
 void MainWindow::buttonClicked(QString data) {
-    QUrl url = QUrl(data);
+    QRegExp regExp("^(((http|ftp)(s?)://)|(www.))(([a-zA-Z0-9-.]+(.[a-zA-Z0-9-.]+)+)|localhost)(/?)([a-zA-Z0-9-.?,'/\\+&%$#_])?([\\d\\w./%+-=&amp;?:\\&quot;',|~;])$");
+    regExp.indexIn(data);
     QFileInfo info = QFileInfo(data);
-    if (url.isValid()) {
+    if (regExp.cap(0).length() != 0) {
         QDesktopServices::openUrl(QUrl(data));
     }
     if (info.isExecutable()) {

@@ -7,6 +7,7 @@
 #include <QDesktopServices>
 #include <QDesktopWidget>
 #include <QDir>
+#include <QRegExp>
 #include <QFileInfo>
 #include <QLabel>
 #include <QList>
