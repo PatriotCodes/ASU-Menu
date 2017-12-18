@@ -7,14 +7,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    errorLoadingFileLabel = new QLabel(this);
     QSize desktopSize = qApp->desktop()->availableGeometry().size();
     windowSize = QSize(desktopSize.width() * 0.8, desktopSize.height() * 0.9);
     centerAndResize();
     userIniFilename = QDir::currentPath() + "/debug/" + qgetenv("USERNAME") + ".ini";  // TODO: Consider using WinApi (https://stackoverflow.com/questions/26552517/get-system-username-in-qt)
     if (!FileWriter::exists(userIniFilename)) {
         errorLoadingFileMsg();
+    } else {
+        initialiseInterface();
     }
-    initialiseInterface();
 }
 
 MainWindow::~MainWindow()
@@ -34,7 +36,6 @@ inline void MainWindow::centerAndResize() {
 }
 
 inline void MainWindow::errorLoadingFileMsg() {
-    errorLoadingFileLabel = new QLabel(this);
     QFont f("Helvetica", 10, QFont::Bold);
     errorLoadingFileLabel->setFont(f);
     errorLoadingFileLabel->setStyleSheet("QLabel { color : red; }");
@@ -77,5 +78,6 @@ inline void MainWindow::addButtonAction(QPushButton *button, QString action) {
 }
 
 void MainWindow::buttonClicked(QString data) {
-    qDebug() << data;
+    //QDesktopServices::openUrl(QUrl(data));
+    QProcess::startDetached(data);
 }

@@ -4,12 +4,13 @@
 #include "filewriter.h"
 #include "iniparser.h"
 #include "inisection.h"
-#include <QPushButton>
 #include <QDesktopWidget>
 #include <QDir>
 #include <QLabel>
 #include <QList>
 #include <QMainWindow>
+#include <QProcess>
+#include <QPushButton>
 #include <QSignalMapper>
 #include <QSize>
 #include <QString>
@@ -19,6 +20,8 @@
 
 #include <QDebug>
 #include <QSettings>
+#include <QDesktopServices>
+#include <QUrl>
 
 namespace Ui {
 class MainWindow;

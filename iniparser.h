@@ -12,6 +12,9 @@ class IniParser
 public:
     IniParser();
     static QList<IniSection> parse(QString);
+
+private:
+    inline static QString removeTrailingLeadingSpaces(QString);
 };
 
 #endif // INIPARSER_H
