@@ -10,6 +10,7 @@
 #include <QLabel>
 #include <QList>
 #include <QMainWindow>
+#include <QSignalMapper>
 #include <QSize>
 #include <QString>
 #include <QTabWidget>
@@ -31,6 +32,9 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+public slots:
+    void buttonClicked(QString);
+
 private:
     Ui::MainWindow *ui;
     QLabel *errorLoadingFileLabel;
@@ -40,6 +44,7 @@ private:
     inline void errorLoadingFileMsg();
     void resizeEvent(QResizeEvent*) override;
     void initialiseInterface();
+    inline void addButtonAction(QPushButton*,QString);
 };
 
 #endif // MAINWINDOW_H

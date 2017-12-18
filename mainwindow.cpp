@@ -62,8 +62,20 @@ void MainWindow::initialiseInterface() {
         for (int j = 0; j < iniSections[i].itemList.count(); j++) {
             QPushButton *newButton = new QPushButton(iniSections[i].itemList[j]->key);
             layout->addWidget(newButton);
+            addButtonAction(newButton, iniSections[i].itemList[j]->value);
         }
         newTab->setLayout(layout);
         tabWidget->addTab(newTab, iniSections[i].sectionName);
     }
+}
+
+inline void MainWindow::addButtonAction(QPushButton *button, QString action) {
+    QSignalMapper* signalMapper = new QSignalMapper(this);
+    signalMapper->setMapping(button, action);
+    connect(signalMapper, SIGNAL(mapped(QString)), this, SLOT(buttonClicked(QString)));
+    connect(button, SIGNAL(clicked()), signalMapper, SLOT(map()));
+}
+
+void MainWindow::buttonClicked(QString data) {
+    qDebug() << data;
 }
