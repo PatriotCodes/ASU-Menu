@@ -78,6 +78,12 @@ inline void MainWindow::addButtonAction(QPushButton *button, QString action) {
 }
 
 void MainWindow::buttonClicked(QString data) {
-    //QDesktopServices::openUrl(QUrl(data));
-    QProcess::startDetached(data);
+    QUrl url = QUrl(data);
+    QFileInfo info = QFileInfo(data);
+    if (url.isValid()) {
+        QDesktopServices::openUrl(QUrl(data));
+    }
+    if (info.isExecutable()) {
+        QProcess::startDetached('"' + data + '"');
+    }
 }

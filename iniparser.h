@@ -15,6 +15,7 @@ public:
 
 private:
     inline static QString removeTrailingLeadingSpaces(QString);
+    inline static QString removeParenthesis(QString);
 };
 
 #endif // INIPARSER_H
