@@ -3,7 +3,7 @@
 IniParser::IniParser()
 {}
 
-QList<IniSection> IniParser::parse(QString fileName) { // TODO: add checks
+QList<IniSection> IniParser::parse(QString fileName) { // TODO: add checks, key value strings format
     QStringList iniLines = FileWriter::read(fileName);
     QList<IniSection> result;
     for (int i = 0; i < iniLines.count(); i++) {
@@ -19,7 +19,7 @@ QList<IniSection> IniParser::parse(QString fileName) { // TODO: add checks
         }
         if (line.contains('=')) {
             QStringList keyValue = line.split('=');
-            result.back().itemList.insert(keyValue[0],keyValue[1]);
+            result.back().itemList.append(new KeyValue(keyValue[0],keyValue[1])); // TODO: needs Destructor
         }
     }
     return result;

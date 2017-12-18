@@ -34,7 +34,8 @@ HEADERS += \
         mainwindow.h \
     filewriter.h \
     iniparser.h \
-    inisection.h
+    inisection.h \
+    keyvalue.h
 
 FORMS += \
         mainwindow.ui

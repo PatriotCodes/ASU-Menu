@@ -3,6 +3,7 @@
 
 #include "filewriter.h"
 #include "inisection.h"
+#include "keyvalue.h"
 #include <QList>
 #include <QStringList>
 

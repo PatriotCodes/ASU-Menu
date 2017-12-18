@@ -1,13 +1,14 @@
 #ifndef INISECTION_H
 #define INISECTION_H
 
+#include "keyvalue.h"
 #include <QString>
-#include <QMap>
+#include <QVector>
 
 
 struct IniSection {
     QString sectionName;
-    QMap<QString, QString> itemList;
+    QVector<KeyValue*> itemList;
 };
 
 #endif // INISECTION_H
