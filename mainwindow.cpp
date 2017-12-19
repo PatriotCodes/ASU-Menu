@@ -35,22 +35,13 @@ inline void MainWindow::centerAndResize() {
     );
 }
 
-inline void MainWindow::errorLoadingFileMsg() {
+inline void MainWindow::errorLoadingFileMsg() {  // TODO: add retry button
     QFont f("Helvetica", 10, QFont::Bold);
     errorLoadingFileLabel->setFont(f);
     errorLoadingFileLabel->setStyleSheet("QLabel { color : red; }");
     errorLoadingFileLabel->setText("Не удается найти файл с настройками для текущего пользователя системы!");
     errorLoadingFileLabel->setAlignment(Qt::AlignCenter);
-    errorLoadingFileLabel->setGeometry(QRect(0,0,windowSize.width(),windowSize.height()));
-}
-
-// TODO: use layout instead of resizeEvent
-void MainWindow::resizeEvent(QResizeEvent *event) {
-    windowSize = QSize(this->width(),this->height());
-    if (errorLoadingFileLabel->isEnabled()) {
-        errorLoadingFileLabel->setGeometry(QRect(0,0,windowSize.width(),windowSize.height()));
-    }
-    QMainWindow::resizeEvent(event);
+    MainWindow::setCentralWidget(errorLoadingFileLabel);
 }
 
 void MainWindow::initialiseInterface() {

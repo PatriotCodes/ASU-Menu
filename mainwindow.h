@@ -47,7 +47,6 @@ private:
     QString userIniFilename;
     inline void centerAndResize();
     inline void errorLoadingFileMsg();
-    void resizeEvent(QResizeEvent*) override;
     void initialiseInterface();
     inline void addButtonAction(QPushButton*,QString);
 };

@@ -3,7 +3,7 @@
 IniParser::IniParser()
 {}
 
-QList<IniSection> IniParser::parse(QString fileName) { // TODO: add checks, key value strings format
+QList<IniSection> IniParser::parse(QString fileName) {
     QStringList iniLines = FileWriter::read(fileName);
     QList<IniSection> result;
     for (int i = 0; i < iniLines.count(); i++) {
