@@ -10,7 +10,10 @@ MainWindow::MainWindow(QWidget *parent) :
     errorLoadingFileLabel = new QLabel(this);
     QSize desktopSize = qApp->desktop()->availableGeometry().size();
     windowSize = QSize(desktopSize.width() * 0.8, desktopSize.height() * 0.9);
+    firstHide = true;
     centerAndResize();
+    createTrayActions();
+    createTrayIcon();
     userIniFilename = QDir::currentPath() + "/debug/" + qgetenv("USERNAME") + ".ini";  // TODO: Consider using WinApi (https://stackoverflow.com/questions/26552517/get-system-username-in-qt)
     if (!FileWriter::exists(userIniFilename)) {
         errorLoadingFileMsg();
@@ -47,12 +50,14 @@ inline void MainWindow::errorLoadingFileMsg() {  // TODO: add retry button
 void MainWindow::initialiseInterface() {
     QList<IniSection> iniSections = IniParser::parse(userIniFilename);
     QTabWidget *tabWidget = new QTabWidget;
+    tabWidget->setFont(QFont("Helvetica",12));
     MainWindow::setCentralWidget(tabWidget);
     for (int i = 0; i < iniSections.count(); i++) {
         QWidget *newTab = new QWidget(tabWidget);
         QVBoxLayout *layout = new QVBoxLayout;
         for (int j = 0; j < iniSections[i].itemList.count(); j++) {
             QPushButton *newButton = new QPushButton(iniSections[i].itemList[j]->key);
+            newButton->setMinimumHeight(windowSize.height()/12);
             layout->addWidget(newButton);
             addButtonAction(newButton, iniSections[i].itemList[j]->value);
         }
@@ -78,4 +83,54 @@ void MainWindow::buttonClicked(QString data) {
     if (info.isExecutable()) {
         QProcess::startDetached('"' + data + '"');
     }
+}
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+    hide();
+    trayIcon->show();
+    event->ignore();
+    if (firstHide) {
+        showMessageTray();
+        firstHide = false;
+    }
+}
+
+inline void MainWindow::createTrayActions()
+{
+    restoreAction = new QAction(tr("&Открыть меню"), this);
+    connect(restoreAction, SIGNAL(triggered()), this, SLOT(showNormal()));
+    quitAction = new QAction(tr("&Выйти"), this);
+    connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+}
+
+inline void MainWindow::createTrayIcon()
+{
+    trayIconMenu = new QMenu(this);
+    trayIconMenu->addAction(restoreAction);
+    trayIconMenu->addSeparator();
+    trayIconMenu->addAction(quitAction);
+    trayIcon = new QSystemTrayIcon(this);
+    trayIcon->setContextMenu(trayIconMenu);
+    trayIcon->setIcon(QIcon(":icons/icon.ico"));
+    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(trayIconClicked(QSystemTrayIcon::ActivationReason)));
+}
+
+void MainWindow::trayIconClicked(QSystemTrayIcon::ActivationReason reason)
+{
+    switch (reason) {
+    case QSystemTrayIcon::Trigger:
+    case QSystemTrayIcon::DoubleClick:
+        showNormal();
+        break;
+    case QSystemTrayIcon::MiddleClick:
+        break;
+    default:
+        break;
+    }
+}
+
+void MainWindow::showMessageTray()
+{
+    QString message("Чтобы закрыть программу выберете в контекстном меню пункт 'Выйти'.");
+    trayIcon->showMessage("АСУ-Меню", message, QSystemTrayIcon::MessageIcon(1), 10000);
 }
