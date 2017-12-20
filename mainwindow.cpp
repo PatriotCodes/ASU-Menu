@@ -50,7 +50,9 @@ inline void MainWindow::errorLoadingFileMsg() {  // TODO: add retry button
 void MainWindow::initialiseInterface() {
     QList<IniSection> iniSections = IniParser::parse(userIniFilename);
     QTabWidget *tabWidget = new QTabWidget;
+    QLabel *label = new QLabel("Текущий браузер для октрытия веб-страниц: " + getDefaultBrowser());
     tabWidget->setFont(QFont("Helvetica",12));
+    MainWindow::statusBar()->addPermanentWidget(label);
     MainWindow::setCentralWidget(tabWidget);
     for (int i = 0; i < iniSections.count(); i++) {
         QWidget *newTab = new QWidget(tabWidget);
@@ -95,16 +97,14 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     }
 }
 
-inline void MainWindow::createTrayActions()
-{
+inline void MainWindow::createTrayActions() {
     restoreAction = new QAction(tr("&Открыть меню"), this);
     connect(restoreAction, SIGNAL(triggered()), this, SLOT(showNormal()));
     quitAction = new QAction(tr("&Выйти"), this);
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
 }
 
-inline void MainWindow::createTrayIcon()
-{
+inline void MainWindow::createTrayIcon() {
     trayIconMenu = new QMenu(this);
     trayIconMenu->addAction(restoreAction);
     trayIconMenu->addSeparator();
@@ -115,8 +115,7 @@ inline void MainWindow::createTrayIcon()
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(trayIconClicked(QSystemTrayIcon::ActivationReason)));
 }
 
-void MainWindow::trayIconClicked(QSystemTrayIcon::ActivationReason reason)
-{
+void MainWindow::trayIconClicked(QSystemTrayIcon::ActivationReason reason) {
     switch (reason) {
     case QSystemTrayIcon::Trigger:
     case QSystemTrayIcon::DoubleClick:
@@ -129,8 +128,24 @@ void MainWindow::trayIconClicked(QSystemTrayIcon::ActivationReason reason)
     }
 }
 
-void MainWindow::showMessageTray()
-{
+void MainWindow::showMessageTray() {
     QString message("Чтобы закрыть программу выберете в контекстном меню пункт 'Выйти'.");
     trayIcon->showMessage("АСУ-Меню", message, QSystemTrayIcon::MessageIcon(1), 10000);
+}
+
+QString MainWindow::getDefaultBrowser() {
+    QSettings browser("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\Shell\\Associations\\UrlAssociations\\http\\UserChoice", QSettings::NativeFormat);
+    if (browser.value("ProgId").toString() == "ChromeHTML") {
+        return "Google Chrome";
+    }
+    if (browser.value("ProgId").toString() == "FirefoxURL") {
+        return "Mozilla Firefox";
+    }
+    if (browser.value("ProgId").toString() == "IE.HTTP") {
+        return "Internet Explorer";
+    }
+    if (browser.value("ProgId").toString() == "AppXq0fevzme2pys62n3e0fbqa7peapykr8v") {
+        return "Microsoft Edge";
+    }
+    return browser.value("ProgId").toString();
 }

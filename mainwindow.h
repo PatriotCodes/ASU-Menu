@@ -65,6 +65,7 @@ private:
     inline void createTrayIcon();
     inline void createTrayActions();
     void showMessageTray();
+    QString getDefaultBrowser();
 };
 
 #endif // MAINWINDOW_H
