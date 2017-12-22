@@ -7,11 +7,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->mainToolBar->hide();
+    ui->statusBar->hide();
     errorLoadingFileLabel = new QLabel(this);
     QSize desktopSize = qApp->desktop()->availableGeometry().size();
-    windowSize = QSize(desktopSize.width() * 0.8, desktopSize.height() * 0.9);
+    windowSize = QSize(desktopSize.width() * 0.4, desktopSize.height() * 0.9);
     firstHide = true;
-    centerAndResize();
+    alignAndResize();
     createTrayActions();
     createTrayIcon();
     userIniFilename = QDir::currentPath() + "/debug/" + qgetenv("USERNAME") + ".ini";  // TODO: Consider using WinApi (https://stackoverflow.com/questions/26552517/get-system-username-in-qt)
@@ -27,18 +29,18 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-inline void MainWindow::centerAndResize() {
+void MainWindow::alignAndResize() {
     setGeometry(
         QStyle::alignedRect(
             Qt::LeftToRight,
-            Qt::AlignCenter,
+            Qt::AlignRight,
             windowSize,
             qApp->desktop()->availableGeometry()
         )
     );
 }
 
-inline void MainWindow::errorLoadingFileMsg() {  // TODO: add retry button
+void MainWindow::errorLoadingFileMsg() {  // TODO: add retry button
     QFont f("Helvetica", 10, QFont::Bold);
     errorLoadingFileLabel->setFont(f);
     errorLoadingFileLabel->setStyleSheet("QLabel { color : red; }");
@@ -50,9 +52,7 @@ inline void MainWindow::errorLoadingFileMsg() {  // TODO: add retry button
 void MainWindow::initialiseInterface() {
     QList<IniSection> iniSections = IniParser::parse(userIniFilename);
     QTabWidget *tabWidget = new QTabWidget;
-    QLabel *label = new QLabel("Текущий браузер для октрытия веб-страниц: " + getDefaultBrowser());
     tabWidget->setFont(QFont("Helvetica",12));
-    MainWindow::statusBar()->addPermanentWidget(label);
     MainWindow::setCentralWidget(tabWidget);
     for (int i = 0; i < iniSections.count(); i++) {
         QWidget *newTab = new QWidget(tabWidget);
@@ -63,12 +63,13 @@ void MainWindow::initialiseInterface() {
             layout->addWidget(newButton);
             addButtonAction(newButton, iniSections[i].itemList[j]->value);
         }
+        layout->addStretch();
         newTab->setLayout(layout);
         tabWidget->addTab(newTab, iniSections[i].sectionName);
     }
 }
 
-inline void MainWindow::addButtonAction(QPushButton *button, QString action) {
+void MainWindow::addButtonAction(QPushButton *button, QString action) {
     QSignalMapper* signalMapper = new QSignalMapper(this);
     signalMapper->setMapping(button, action);
     connect(signalMapper, SIGNAL(mapped(QString)), this, SLOT(buttonClicked(QString)));
@@ -97,14 +98,14 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     }
 }
 
-inline void MainWindow::createTrayActions() {
+void MainWindow::createTrayActions() {
     restoreAction = new QAction(tr("&Открыть меню"), this);
     connect(restoreAction, SIGNAL(triggered()), this, SLOT(showNormal()));
     quitAction = new QAction(tr("&Выйти"), this);
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
 }
 
-inline void MainWindow::createTrayIcon() {
+void MainWindow::createTrayIcon() {
     trayIconMenu = new QMenu(this);
     trayIconMenu->addAction(restoreAction);
     trayIconMenu->addSeparator();
@@ -131,21 +132,4 @@ void MainWindow::trayIconClicked(QSystemTrayIcon::ActivationReason reason) {
 void MainWindow::showMessageTray() {
     QString message("Чтобы закрыть программу выберете в контекстном меню пункт 'Выйти'.");
     trayIcon->showMessage("АСУ-Меню", message, QSystemTrayIcon::MessageIcon(1), 10000);
-}
-
-QString MainWindow::getDefaultBrowser() {
-    QSettings browser("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\Shell\\Associations\\UrlAssociations\\http\\UserChoice", QSettings::NativeFormat);
-    if (browser.value("ProgId").toString() == "ChromeHTML") {
-        return "Google Chrome";
-    }
-    if (browser.value("ProgId").toString() == "FirefoxURL") {
-        return "Mozilla Firefox";
-    }
-    if (browser.value("ProgId").toString() == "IE.HTTP") {
-        return "Internet Explorer";
-    }
-    if (browser.value("ProgId").toString() == "AppXq0fevzme2pys62n3e0fbqa7peapykr8v") {
-        return "Microsoft Edge";
-    }
-    return browser.value("ProgId").toString();
 }

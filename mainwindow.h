@@ -21,6 +21,7 @@
 #include <QSize>
 #include <QSystemTrayIcon>
 #include <QString>
+#include <Qt>
 #include <QTabWidget>
 #include <QTextEdit>
 #include <QUrl>
@@ -57,15 +58,14 @@ private:
     QSize windowSize;
     QString userIniFilename;
     bool firstHide;
-    inline void centerAndResize();
-    inline void errorLoadingFileMsg();
+    void alignAndResize();
+    void errorLoadingFileMsg();
     void initialiseInterface();
-    inline void addButtonAction(QPushButton*,QString);
+    void addButtonAction(QPushButton*,QString);
     void closeEvent(QCloseEvent*);
-    inline void createTrayIcon();
-    inline void createTrayActions();
+    void createTrayIcon();
+    void createTrayActions();
     void showMessageTray();
-    QString getDefaultBrowser();
 };
 
 #endif // MAINWINDOW_H
