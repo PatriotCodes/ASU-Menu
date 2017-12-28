@@ -16,6 +16,8 @@ MainWindow::MainWindow(QWidget *parent) :
     alignAndResize();
     createTrayActions();
     createTrayIcon();
+    if (!loadSettings(QDir::currentPath() + "/debug/" + "settings.ini"))
+        browserPath = "";
     userIniFilename = QDir::currentPath() + "/debug/" + qgetenv("USERNAME") + ".ini";  // TODO: Consider using WinApi (https://stackoverflow.com/questions/26552517/get-system-username-in-qt)
     if (!FileWriter::exists(userIniFilename)) {
         errorLoadingFileMsg();
@@ -81,11 +83,13 @@ void MainWindow::buttonClicked(QString data) {
     regExp.indexIn(data);
     QFileInfo info = QFileInfo(data);
     if (regExp.cap(0).length() != 0) {
-        QDesktopServices::openUrl(QUrl(data));
+        if (browserPath == "")
+            QDesktopServices::openUrl(QUrl(data));
+        else
+            QProcess::startDetached(browserPath, QStringList(data));
     }
-    if (info.isExecutable()) {
+    if (info.isExecutable())
         QProcess::startDetached('"' + data + '"');
-    }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -131,5 +135,14 @@ void MainWindow::trayIconClicked(QSystemTrayIcon::ActivationReason reason) {
 
 void MainWindow::showMessageTray() {
     QString message("Чтобы закрыть программу выберете в контекстном меню пункт 'Выйти'.");
-    trayIcon->showMessage("АСУ-Меню", message, QSystemTrayIcon::MessageIcon(1), 10000);
+    trayIcon->showMessage("АСУ-Меню", message, QSystemTrayIcon::MessageIcon(1), 5000);
+}
+
+bool MainWindow::loadSettings(QString settingFileName) {
+    if (FileWriter::exists(settingFileName)) {
+        QList<IniSection> parseResult = IniParser::parse(settingFileName);
+        browserPath = IniParser::valueByKey(parseResult, "browser");
+        return true;
+    }
+    return false;
 }

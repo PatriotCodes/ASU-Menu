@@ -22,13 +22,18 @@ QList<IniSection> IniParser::parse(QString fileName) {
             QStringList keyValue = line.split('=');
             keyValue[1] = removeTrailingLeadingSpaces(keyValue[1]);
             keyValue[0] = removeTrailingLeadingSpaces(keyValue[0]);
+            if (result.count() == 0) {
+                IniSection section;
+                section.sectionName = "";
+                result.append(section);
+            }
             result.back().itemList.append(new KeyValue(keyValue[0],removeParenthesis(keyValue[1]))); // TODO: needs Destructor
         }
     }
     return result;
 }
 
-inline QString IniParser::removeTrailingLeadingSpaces(QString string) {
+QString IniParser::removeTrailingLeadingSpaces(QString string) {
     for (int i = 0; i < string.count(); i++) {
         if (string[i] == ' ') {
             string.remove(i,1);
@@ -46,7 +51,7 @@ inline QString IniParser::removeTrailingLeadingSpaces(QString string) {
     return string;
 }
 
-inline QString IniParser::removeParenthesis(QString string) {
+QString IniParser::removeParenthesis(QString string) {
     for (int i = 0; i < string.count(); i++) {
         if (string[i] == '"' || string[i] == '[') {
             string.remove(i,1);
@@ -62,4 +67,15 @@ inline QString IniParser::removeParenthesis(QString string) {
         }
     }
     return string;
+}
+
+QString IniParser::valueByKey(QList<IniSection> sections, QString key) {
+    for (auto section:sections) {
+        for (int i = 0; i < section.itemList.count(); i++) {
+            if (section.itemList[i]->key == key) {
+                return section.itemList[i]->value;
+            }
+        }
+    }
+    return "";
 }

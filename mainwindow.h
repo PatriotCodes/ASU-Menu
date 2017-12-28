@@ -57,6 +57,7 @@ private:
     QAction *quitAction;
     QSize windowSize;
     QString userIniFilename;
+    QString browserPath;
     bool firstHide;
     void alignAndResize();
     void errorLoadingFileMsg();
@@ -66,6 +67,7 @@ private:
     void createTrayIcon();
     void createTrayActions();
     void showMessageTray();
+    bool loadSettings(QString);
 };
 
 #endif // MAINWINDOW_H

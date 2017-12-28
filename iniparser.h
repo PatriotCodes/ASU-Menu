@@ -12,10 +12,11 @@ class IniParser
 public:
     IniParser();
     static QList<IniSection> parse(QString);
+    static QString valueByKey(QList<IniSection>,QString);
 
 private:
-    inline static QString removeTrailingLeadingSpaces(QString);
-    inline static QString removeParenthesis(QString);
+    static QString removeTrailingLeadingSpaces(QString);
+    static QString removeParenthesis(QString);
 };
 
 #endif // INIPARSER_H
