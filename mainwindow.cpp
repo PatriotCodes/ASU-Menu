@@ -10,8 +10,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->mainToolBar->hide();
     ui->statusBar->hide();
     errorLoadingFileLabel = new QLabel(this);
-    QSize desktopSize = qApp->desktop()->availableGeometry().size();
-    windowSize = QSize(desktopSize.width() * 0.4, desktopSize.height() * 0.9);
     firstHide = true;
     alignAndResize();
     createTrayActions();
@@ -32,14 +30,10 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::alignAndResize() {
-    setGeometry(
-        QStyle::alignedRect(
-            Qt::LeftToRight,
-            Qt::AlignRight,
-            windowSize,
-            qApp->desktop()->availableGeometry()
-        )
-    );
+    QSize desktopSize = qApp->desktop()->availableGeometry().size();
+    windowSize = QSize(desktopSize.width() * 0.4, desktopSize.height() * 0.9);
+    this->resize(windowSize);
+    this->move(desktopSize.width() - windowSize.width() - 20, 20);
 }
 
 void MainWindow::errorLoadingFileMsg() {  // TODO: add retry button
@@ -88,8 +82,9 @@ void MainWindow::buttonClicked(QString data) {
         else
             QProcess::startDetached(browserPath, QStringList(data));
     }
-    if (info.isExecutable())
-        QProcess::startDetached('"' + data + '"');
+    if (info.isExecutable()) {
+        QProcess::startDetached(('"' + data + '"'));
+    }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {

@@ -9,6 +9,7 @@
 struct IniSection {
     QString sectionName;
     QVector<KeyValue*> itemList;
+    QStringList args;
 };
 
 #endif // INISECTION_H
