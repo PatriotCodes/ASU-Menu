@@ -62,12 +62,14 @@ private:
     void alignAndResize();
     void errorLoadingFileMsg();
     void initialiseInterface();
-    void addButtonAction(QPushButton*,QString);
+    void addButtonAction(QPushButton*,QString,QStringList);
     void closeEvent(QCloseEvent*);
     void createTrayIcon();
     void createTrayActions();
     void showMessageTray();
     bool loadSettings(QString);
+    QString createButtonActionString(QString,QStringList);
+    KeyValue<QString,QStringList> parseButtonActionString(QString);
 };
 
 #endif // MAINWINDOW_H

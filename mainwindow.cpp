@@ -54,10 +54,10 @@ void MainWindow::initialiseInterface() {
         QWidget *newTab = new QWidget(tabWidget);
         QVBoxLayout *layout = new QVBoxLayout;
         for (int j = 0; j < iniSections[i].itemList.count(); j++) {
-            QPushButton *newButton = new QPushButton(iniSections[i].itemList[j]->key);
+            QPushButton *newButton = new QPushButton(iniSections[i].itemList[j]->buttonName);
             newButton->setMinimumHeight(windowSize.height()/12);
             layout->addWidget(newButton);
-            addButtonAction(newButton, iniSections[i].itemList[j]->value);
+            addButtonAction(newButton, iniSections[i].itemList[j]->buttonAction, iniSections[i].itemList[j]->args);
         }
         layout->addStretch();
         newTab->setLayout(layout);
@@ -65,25 +65,41 @@ void MainWindow::initialiseInterface() {
     }
 }
 
-void MainWindow::addButtonAction(QPushButton *button, QString action) {
+void MainWindow::addButtonAction(QPushButton *button, QString action, QStringList args) {
     QSignalMapper* signalMapper = new QSignalMapper(this);
-    signalMapper->setMapping(button, action);
+    QString actionWithArgs = createButtonActionString(action,args);
+    signalMapper->setMapping(button, actionWithArgs);
     connect(signalMapper, SIGNAL(mapped(QString)), this, SLOT(buttonClicked(QString)));
     connect(button, SIGNAL(clicked()), signalMapper, SLOT(map()));
 }
 
+QString MainWindow::createButtonActionString(QString action, QStringList args) {
+    QString result = action + '\n';
+    for (QString arg : args)
+        result.append(arg + ',');
+    return result;
+}
+
+KeyValue<QString,QStringList> MainWindow::parseButtonActionString(QString data) {
+    QStringList keyValue = data.split('\n');
+    QStringList args = keyValue[1].split(',');
+    args.removeAll("");
+    return KeyValue<QString,QStringList>(keyValue[0],args);
+}
+
 void MainWindow::buttonClicked(QString data) {
+    KeyValue<QString,QStringList> action = parseButtonActionString(data);
     QRegExp regExp("^(((http|ftp)(s?)://)|(www.))(([a-zA-Z0-9-.]+(.[a-zA-Z0-9-.]+)+)|localhost)(/?)([a-zA-Z0-9-.?,'/\\+&%$#_])?([\\d\\w./%+-=&amp;?:\\&quot;',|~;])$");
-    regExp.indexIn(data);
-    QFileInfo info = QFileInfo(data);
+    regExp.indexIn(action.key);
+    QFileInfo info = QFileInfo(action.key);
     if (regExp.cap(0).length() != 0) {
         if (browserPath == "")
-            QDesktopServices::openUrl(QUrl(data));
+            QDesktopServices::openUrl(QUrl(action.key));
         else
-            QProcess::startDetached(browserPath, QStringList(data));
+            QProcess::startDetached(browserPath, QStringList(action.key));
     }
     if (info.isExecutable()) {
-        QProcess::startDetached(('"' + data + '"'));
+        QProcess::startDetached(('"' + action.key + '"'),action.value);
     }
 }
 

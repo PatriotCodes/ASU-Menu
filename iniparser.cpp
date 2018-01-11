@@ -27,11 +27,12 @@ QList<IniSection> IniParser::parse(QString fileName) {
                 section.sectionName = "";
                 result.append(section);
             }
+            QStringList args;
             if (keyValue[0] == "args") {
-                QStringList args = parseArgs(keyValue[1]);
-                result.back().args.append(args);
+                args = parseArgs(keyValue[1]);
+                result.back().itemList.last()->args.append(args);
             } else {
-                result.back().itemList.append(new KeyValue(keyValue[0],removeParenthesis(keyValue[1])));
+                result.back().itemList.append(new IniItem(keyValue[0],(removeParenthesis(keyValue[1])),args));
             }
         }
     }
@@ -77,8 +78,8 @@ QString IniParser::removeParenthesis(QString string) {
 QString IniParser::valueByKey(QList<IniSection> sections, QString key) {
     for (auto section:sections) {
         for (int i = 0; i < section.itemList.count(); i++) {
-            if (section.itemList[i]->key == key) {
-                return section.itemList[i]->value;
+            if (section.itemList[i]->buttonName == key) {
+                return section.itemList[i]->buttonAction;
             }
         }
     }

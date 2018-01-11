@@ -1,13 +1,14 @@
 #ifndef KEYVALUE_H
 #define KEYVALUE_H
 
-#include <QString>
+#include <QObject>
 
+template <typename TKey, typename TValue>
 struct KeyValue {
-    QString key;
-    QString value;
+    TKey key;
+    TValue value;
 
-    KeyValue(QString key, QString value) {
+    KeyValue(TKey key, TValue value) {
         this->key = key;
         this->value = value;
     }
