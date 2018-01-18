@@ -65,30 +65,17 @@ void MainWindow::initialiseInterface() {
     }
 }
 
-void MainWindow::addButtonAction(QPushButton *button, QString action, QStringList args) {
+void MainWindow::addButtonAction(QPushButton *button, QString action, QString args) {
     QSignalMapper* signalMapper = new QSignalMapper(this);
-    QString actionWithArgs = createButtonActionString(action,args);
+    QString actionWithArgs = action + '\n' + args;
     signalMapper->setMapping(button, actionWithArgs);
     connect(signalMapper, SIGNAL(mapped(QString)), this, SLOT(buttonClicked(QString)));
     connect(button, SIGNAL(clicked()), signalMapper, SLOT(map()));
 }
 
-QString MainWindow::createButtonActionString(QString action, QStringList args) {
-    QString result = action + '\n';
-    for (QString arg : args)
-        result.append(arg + ',');
-    return result;
-}
-
-KeyValue<QString,QStringList> MainWindow::parseButtonActionString(QString data) {
-    QStringList keyValue = data.split('\n');
-    QStringList args = keyValue[1].split(',');
-    args.removeAll("");
-    return KeyValue<QString,QStringList>(keyValue[0],args);
-}
-
 void MainWindow::buttonClicked(QString data) {
-    KeyValue<QString,QStringList> action = parseButtonActionString(data);
+    QStringList keyValue = data.split('\n');
+    KeyValue<QString,QString> action = KeyValue<QString,QString>(keyValue[0],keyValue[1]);
     QRegExp regExp("^(((http|ftp)(s?)://)|(www.))(([a-zA-Z0-9-.]+(.[a-zA-Z0-9-.]+)+)|localhost)(/?)([a-zA-Z0-9-.?,'/\\+&%$#_])?([\\d\\w./%+-=&amp;?:\\&quot;',|~;])$");
     regExp.indexIn(action.key);
     QFileInfo info = QFileInfo(action.key);
@@ -99,7 +86,7 @@ void MainWindow::buttonClicked(QString data) {
             QProcess::startDetached(browserPath, QStringList(action.key));
     }
     if (info.isExecutable()) {
-        QProcess::startDetached(('"' + action.key + '"'),action.value);
+        QProcess::startDetached(('"' + action.key + '"'),QStringList(action.value));
     }
 }
 

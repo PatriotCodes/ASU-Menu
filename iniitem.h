@@ -7,9 +7,9 @@
 struct IniItem {
     QString buttonName;
     QString buttonAction;
-    QStringList args;
+    QString args;
 
-    IniItem(QString buttonName, QString buttonAction, QStringList args) {
+    IniItem(QString buttonName, QString buttonAction, QString args) {
         this->buttonName = buttonName;
         this->buttonAction = buttonAction;
         this->args = args;
