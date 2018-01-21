@@ -9,6 +9,7 @@
 #include <QDesktopServices>
 #include <QDesktopWidget>
 #include <QDir>
+#include <QEvent>
 #include <QRegExp>
 #include <QFileInfo>
 #include <QLabel>
@@ -64,6 +65,7 @@ private:
     void initialiseInterface();
     void addButtonAction(QPushButton*,QString,QString);
     void closeEvent(QCloseEvent*);
+    void changeEvent(QEvent* e);
     void createTrayIcon();
     void createTrayActions();
     void showMessageTray();

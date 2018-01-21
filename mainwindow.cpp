@@ -131,9 +131,15 @@ void MainWindow::trayIconClicked(QSystemTrayIcon::ActivationReason reason) {
     }
 }
 
+void MainWindow::changeEvent(QEvent* e)
+{
+   if (e->type() == QEvent::ActivationChange && !(this->isActiveWindow()))
+       emit close();
+}
+
 void MainWindow::showMessageTray() {
     QString message("Чтобы закрыть программу выберете в контекстном меню пункт 'Выйти'.");
-    trayIcon->showMessage("АСУ-Меню", message, QSystemTrayIcon::MessageIcon(1), 5000);
+    trayIcon->showMessage("АСУ-Меню", message, QSystemTrayIcon::MessageIcon(1), 1000);
 }
 
 bool MainWindow::loadSettings(QString settingFileName) {
