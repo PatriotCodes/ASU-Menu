@@ -123,6 +123,7 @@ void MainWindow::trayIconClicked(QSystemTrayIcon::ActivationReason reason) {
     case QSystemTrayIcon::Trigger:
     case QSystemTrayIcon::DoubleClick:
         showNormal();
+        this->activateWindow();
         break;
     case QSystemTrayIcon::MiddleClick:
         break;
