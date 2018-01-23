@@ -11,10 +11,10 @@ INSERT INTO actionCategory (categoryName)
 INSERT INTO actionCategory (categoryName) 
 	VALUES ('Категория 2');
 	
-INSERT INTO action (actionName, actionString, categoryID) 
+INSERT INTO workAction (actionName, actionString, categoryID) 
 	VALUES ('открыть проводник','C:\Windows\explorer.exe',1);
-INSERT INTO action (actionName, actionString, actionArguments, categoryID) 
-	VALUES ('открыть проводник с параметрами','/select,C:\Windows\py.exe','C:\Windows\explorer.exe',2);
+INSERT INTO workAction (actionName, actionString, actionArguments, categoryID) 
+	VALUES ('открыть проводник с параметрами','C:\Windows\explorer.exe','/select,C:\Windows\py.exe',2);
 	
 INSERT INTO appointment (workerID, actionID, fromDate)
 	VALUES (1,2,'2017-06-15');

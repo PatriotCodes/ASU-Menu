@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT += core gui
+QT += sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -27,7 +28,8 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     filewriter.cpp \
-    iniparser.cpp
+    iniparser.cpp \
+    databasemanager.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -35,7 +37,8 @@ HEADERS += \
     iniparser.h \
     inisection.h \
     keyvalue.h \
-    iniitem.h
+    iniitem.h \
+    databasemanager.h
 
 FORMS += \
         mainwindow.ui

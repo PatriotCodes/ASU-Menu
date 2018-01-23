@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "databasemanager.h"
 #include "filewriter.h"
 #include "iniparser.h"
 #include "inisection.h"

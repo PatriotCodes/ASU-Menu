@@ -12,7 +12,7 @@ CREATE TABLE actionCategory (
 	PRIMARY KEY (categoryID)
 ) CHARACTER SET utf8;
 
-CREATE TABLE action (
+CREATE TABLE workAction (
 	actionID int NOT NULL AUTO_INCREMENT,
 	actionName varchar(255) NOT NULL,
 	actionString varchar(255) NOT NULL,
@@ -31,6 +31,9 @@ CREATE TABLE appointment (
 	toDate DATE NULL,
 	PRIMARY KEY (appointmentID),
 	FOREIGN KEY (workerID) REFERENCES worker(workerID),
-	FOREIGN KEY (actionID) REFERENCES action(actionID),
+	FOREIGN KEY (actionID) REFERENCES workAction(actionID),
 	FOREIGN KEY (categoryID) REFERENCES actionCategory(categoryID)
 ) CHARACTER SET utf8;
+
+CREATE USER IF NOT EXISTS 'asuuser'@'localhost' IDENTIFIED BY '123';
+GRANT SELECT ON asumenu.* TO 'user'@'localhost';
