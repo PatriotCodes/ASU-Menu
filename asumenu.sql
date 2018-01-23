@@ -3,32 +3,34 @@ USE asumenu;
 CREATE TABLE worker (
 	workerID int NOT NULL,
 	username varchar(255) NOT NULL,
-	password varchar(128) NOT NULL,
 	PRIMARY KEY (workerID)
-);
+) CHARACTER SET utf8;
 
-CREATE TABLE asumenu (
-	asumenuId int NOT NULL,
-	workerID int NOT NULL,
-	PRIMARY KEY (asumenuId),
-	FOREIGN KEY (workerID) REFERENCES worker(workerID)
-);
-
-CREATE TABLE menuCategory (
-	categoryID int NOT NULL,
+CREATE TABLE actionCategory (
+	categoryID int NOT NULL AUTO_INCREMENT,
 	categoryName varchar(255) NOT NULL,
-	asumenuId int NOT NULL,
-	PRIMARY KEY (categoryID),
-	FOREIGN KEY (asumenuId) REFERENCES asumenu(asumenuId)
-);
+	PRIMARY KEY (categoryID)
+) CHARACTER SET utf8;
 
-CREATE TABLE categoryButton (
-	itemID int NOT NULL,
-	buttonName varchar(255) NOT NULL,
+CREATE TABLE action (
+	actionID int NOT NULL AUTO_INCREMENT,
+	actionName varchar(255) NOT NULL,
 	actionString varchar(255) NOT NULL,
-	actionArguments varchar(255),
+	actionArguments varchar(255) NULL,
 	categoryID int NOT NULL,
-	PRIMARY KEY (itemID),
-	FOREIGN KEY (categoryID) REFERENCES menuCategory(categoryID)
-);
-	
+	PRIMARY KEY (actionID),
+	FOREIGN KEY (categoryID) REFERENCES actionCategory(categoryID)
+) CHARACTER SET utf8;
+
+CREATE TABLE appointment (
+	appointmentID int NOT NULL AUTO_INCREMENT,
+	workerID int NOT NULL,
+	actionID int NULL,
+	categoryID int NULL,
+	fromDate DATE NOT NULL,
+	toDate DATE NULL,
+	PRIMARY KEY (appointmentID),
+	FOREIGN KEY (workerID) REFERENCES worker(workerID),
+	FOREIGN KEY (actionID) REFERENCES action(actionID),
+	FOREIGN KEY (categoryID) REFERENCES actionCategory(categoryID)
+) CHARACTER SET utf8;
