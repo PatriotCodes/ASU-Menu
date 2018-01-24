@@ -70,6 +70,7 @@ private:
     void createTrayIcon();
     void createTrayActions();
     void showMessageTray();
+    void updateActions();
     bool loadSettings(QString);
 };
 

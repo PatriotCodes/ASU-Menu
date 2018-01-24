@@ -16,17 +16,19 @@ MainWindow::MainWindow(QWidget *parent) :
     createTrayIcon();
     if (!loadSettings(QDir::currentPath() + "/debug/" + "settings.ini"))
         browserPath = "";
-
-    DatabaseManager db = DatabaseManager();
-    if (db.instantiateConnection("asumenu","localhost",3306,"asuuser","123")) {
-        db.initialiseData(db.userActions(db.userIdByName("Alex")));
-    }
-
     userIniFilename = QDir::currentPath() + "/debug/" + qgetenv("USERNAME") + ".ini";  // TODO: Consider using WinApi (https://stackoverflow.com/questions/26552517/get-system-username-in-qt)
+    updateActions();
     if (!FileWriter::exists(userIniFilename)) {
         errorLoadingFileMsg();
     } else {
         initialiseInterface();
+    }
+}
+
+void MainWindow::updateActions() {
+    DatabaseManager db = DatabaseManager();
+    if (db.instantiateConnection("asumenu","localhost",3306,"asuuser","123")) {
+        FileWriter::write(userIniFilename,IniParser::createIniString(db.initialiseData(db.userActions(db.userIdByName(qgetenv("USERNAME"))))));
     }
 }
 

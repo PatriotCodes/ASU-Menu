@@ -13,6 +13,7 @@ public:
     IniParser();
     static QList<IniSection> parse(QString);
     static QString valueByKey(QList<IniSection>,QString);
+    static QString createIniString(QList<IniSection> sections);
 
 private:
     static QString removeTrailingLeadingSpaces(QString);

@@ -86,3 +86,16 @@ QString IniParser::valueByKey(QList<IniSection> sections, QString key) {
     }
     return "";
 }
+
+QString IniParser::createIniString(QList<IniSection> sections) {
+    QString result;
+    for (auto section : sections) {
+        result.append('[' + section.sectionName + ']' + '\n');
+        for (IniItem *item : section.itemList) {
+            result.append(item->buttonName + " = " + item->buttonAction + '\n');
+            if (!item->args.isNull())
+                result.append("args = " + item->args + '\n');
+        }
+    }
+    return result;
+}
