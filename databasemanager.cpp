@@ -17,12 +17,85 @@ bool DatabaseManager::instantiateConnection(QString dsnName, QString hostname, i
     return db.open();
 }
 
-QStringList DatabaseManager::getDataFromTable(QString tableName, QString data) {
-    QSqlQuery query("SELECT * FROM " + tableName);
-    QStringList result;
-    int fieldNo = query.record().indexOf(data);
+// returns -1 if no worker with such username is found
+int DatabaseManager::userIdByName(QString username) {
+    QSqlQuery query("SELECT workerID FROM worker WHERE username = '" + username + "';");
+    int id = -1;
+    if (query.next()) {
+            QSqlRecord record = query.record();
+            id = (query.value(record.indexOf("workerID")).toString()).toInt();
+    }
+    return id;
+}
+
+QList<int> DatabaseManager::userActions(int userID) {
+    QList<int> results;
+    QSqlQuery query("select * from appointment where workerID = " + QString::number(userID) + ";");
     while (query.next()) {
-            result.append(query.value(fieldNo).toString());
+        QSqlRecord record = query.record();
+        QDate dateFrom = query.value(record.indexOf("fromDate")).toDate();
+        QDate dateTo = query.value(record.indexOf("toDate")).toDate();
+        if (assertDate(dateFrom,dateTo)) {
+            if (!query.value(record.indexOf("actionID")).isNull())
+                results.append((query.value(record.indexOf("actionID")).toString()).toInt());
+            if (!query.value(record.indexOf("categoryID")).isNull()) {
+                QSqlQuery queryCat("select actionID from workAction where categoryID = " + query.value(record.indexOf("categoryID")).toString() + ";");
+                if (queryCat.next()) {
+                    QSqlRecord recordCat = queryCat.record();
+                    results.append((queryCat.value(recordCat.indexOf("actionID")).toString()).toInt());
+                }
+            }
         }
+    }
+    return results;
+}
+
+bool DatabaseManager::assertDate(QDate dateFrom, QDate dateTo) {
+    QDate currentDate = QDate::currentDate();
+    if (dateFrom > currentDate)
+        return false;
+    if (dateFrom < currentDate) {
+        if (dateTo.isNull()) {
+            return true;
+        } else {
+            if (dateTo < currentDate)
+                return true;
+        }
+    }
+    return false;
+}
+
+QList<IniSection> DatabaseManager::initialiseData(QList<int> actions) {
+    QList<IniSection> result;
+    for (int action : actions) {
+        QSqlQuery query("select * from workAction where actionID = " + QString::number(action) + ";");
+        while (query.next()) {
+            QSqlRecord record = query.record();
+            int catID = query.value(record.indexOf("categoryID")).toInt();
+            QSqlQuery catNameQuery("select categoryName from actionCategory where categoryID = " + QString::number(catID) + ";");
+            while (catNameQuery.next()) {
+                int catIndex = indexByVal(result,catNameQuery.value(0).toString());
+                if (catIndex == 0 || catIndex == result.count()) {
+                    IniSection section;
+                    section.sectionName = catNameQuery.value(0).toString();
+                    result.append(section);
+                }
+                QString buttonName = query.value(record.indexOf("actionName")).toString();
+                QString buttonAction = query.value(record.indexOf("actionString")).toString();
+                QString args = query.value(record.indexOf("actionArguments")).toString();
+                result[catIndex].itemList.append(new IniItem(buttonName,buttonAction,args));
+            }
+        }
+    }
     return result;
+}
+
+int DatabaseManager::indexByVal(QList<IniSection> list, QString val) {
+    int index = 0;
+    for (IniSection item : list) {
+        if (item.sectionName == val)
+            return index;
+        index++;
+    }
+    return index;
 }

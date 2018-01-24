@@ -19,9 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     DatabaseManager db = DatabaseManager();
     if (db.instantiateConnection("asumenu","localhost",3306,"asuuser","123")) {
-    QStringList test = db.getDataFromTable("workAction","actionName");
-    for (QString data : test)
-        qDebug() << data;
+        db.initialiseData(db.userActions(db.userIdByName("Alex")));
     }
 
     userIniFilename = QDir::currentPath() + "/debug/" + qgetenv("USERNAME") + ".ini";  // TODO: Consider using WinApi (https://stackoverflow.com/questions/26552517/get-system-username-in-qt)
