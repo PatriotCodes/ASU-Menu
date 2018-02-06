@@ -14,20 +14,22 @@ MainWindow::MainWindow(QWidget *parent) :
     alignAndResize();
     createTrayActions();
     createTrayIcon();
-    if (!loadSettings(QDir::currentPath() + "/debug/" + "settings.ini"))
+    if (!loadSettings(QDir::currentPath() + "/debug/" + "settings.ini")) {
         browserPath = "";
+    }
     userIniFilename = QDir::currentPath() + "/debug/" + qgetenv("USERNAME") + ".ini";  // TODO: Consider using WinApi (https://stackoverflow.com/questions/26552517/get-system-username-in-qt)
     updateActions();
     if (!FileWriter::exists(userIniFilename)) {
         errorLoadingFileMsg();
     } else {
-        initialiseInterface();
+        //initialiseInterface();
+        interfaceTest();
     }
 }
 
 void MainWindow::updateActions() {
     DatabaseManager db = DatabaseManager();
-    if (db.instantiateConnection("asumenu","localhost",3306,"asuuser","123")) {
+    if (db.instantiateConnection("asumenu","127.30.4.69",443,"Student","12345")) {
         FileWriter::write(userIniFilename,IniParser::createIniString(db.initialiseData(db.userActions(db.userIdByName(qgetenv("USERNAME"))))));
     }
 }
@@ -73,6 +75,44 @@ void MainWindow::initialiseInterface() {
     }
 }
 
+void MainWindow::interfaceTest() {
+    // initialise a widget with buttons for sections
+    windowSections = new QWidget;
+    windowSections->setFont(QFont("Helvetica",12));
+    QList<IniSection> iniSections = IniParser::parse(userIniFilename);
+    QVBoxLayout *sections = new QVBoxLayout;
+    windowSections->setLayout(sections);
+    MainWindow::setCentralWidget(windowSections);
+    for (int i = 0; i < iniSections.count(); i++) {
+        QPushButton *newSectionButton = new QPushButton(iniSections[i].sectionName);
+        newSectionButton->setMinimumHeight(windowSize.height()/12);
+        sections->addWidget(newSectionButton);
+        addSectionButtonAction(newSectionButton,i);
+        QWidget *windowActionButtons = new QWidget;
+        windowActionButtons->setFont(QFont("Helvetica",12));
+        QVBoxLayout *layoutActions = new QVBoxLayout;
+        windowActionButtons->setLayout(layoutActions);
+        layoutActions->addWidget(new QLabel(iniSections[i].sectionName));
+        // we initialise buttons for actions and add them to the list of widgets containing buttons for sections
+        for (int j = 0; j < iniSections[i].itemList.count(); j++) {
+            QPushButton *newButton = new QPushButton(iniSections[i].itemList[j]->buttonName);
+            newButton->setMinimumHeight(windowSize.height()/12);
+            layoutActions->addWidget(newButton);
+            addButtonAction(newButton, iniSections[i].itemList[j]->buttonAction, iniSections[i].itemList[j]->args);
+        }
+        layoutActions->addStretch();
+        sectionsButtons.append(windowActionButtons);
+    }
+    sections->addStretch();
+}
+
+void MainWindow::addSectionButtonAction(QPushButton *button, int index) {
+    QSignalMapper* signalMapper = new QSignalMapper(this);
+    signalMapper->setMapping(button, index);
+    connect(signalMapper, SIGNAL(mapped(int)), this, SLOT(sectionButtonClicked(int)));
+    connect(button, SIGNAL(clicked()), signalMapper, SLOT(map()));
+}
+
 void MainWindow::addButtonAction(QPushButton *button, QString action, QString args) {
     QSignalMapper* signalMapper = new QSignalMapper(this);
     QString actionWithArgs = action + '\n' + args;
@@ -88,14 +128,18 @@ void MainWindow::buttonClicked(QString data) {
     regExp.indexIn(action.key);
     QFileInfo info = QFileInfo(action.key);
     if (regExp.cap(0).length() != 0) {
-        if (browserPath == "")
+        if (browserPath == "") {
             QDesktopServices::openUrl(QUrl(action.key));
-        else
+        } else {
             QProcess::startDetached(browserPath, QStringList(action.key));
-    }
-    if (info.isExecutable()) {
+        }
+    } else if (info.isExecutable()) {
         QProcess::startDetached(('"' + action.key + '"'),QStringList(action.value));
     }
+}
+
+void MainWindow::sectionButtonClicked(int index) {
+    MainWindow::setCentralWidget(sectionsButtons[index]);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {

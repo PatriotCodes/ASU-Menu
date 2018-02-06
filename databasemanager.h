@@ -20,6 +20,7 @@ public:
     int userIdByName(QString username);
     QList<int> userActions(int userID);
     QList<IniSection> initialiseData(QList<int> actions);
+    QString getError();
 private:
     QSqlDatabase db;
     bool assertDate(QDate dateFrom, QDate dateTo);

@@ -29,6 +29,7 @@
 #include <QUrl>
 #include <QVBoxLayout>
 #include <QWindow>
+#include <QWidget>
 
 #include <QDebug>
 #include <QSettings>
@@ -49,6 +50,7 @@ public:
 public slots:
     void buttonClicked(QString);
     void trayIconClicked(QSystemTrayIcon::ActivationReason);
+    void sectionButtonClicked(int);
 
 private:
     Ui::MainWindow *ui;
@@ -60,11 +62,14 @@ private:
     QSize windowSize;
     QString userIniFilename;
     QString browserPath;
+    QWidget *windowSections;
+    QList<QWidget*> sectionsButtons;
     bool firstHide;
     void alignAndResize();
     void errorLoadingFileMsg();
     void initialiseInterface();
     void addButtonAction(QPushButton*,QString,QString);
+    void addSectionButtonAction(QPushButton*,int);
     void closeEvent(QCloseEvent*);
     void changeEvent(QEvent* e);
     void createTrayIcon();
@@ -72,6 +77,8 @@ private:
     void showMessageTray();
     void updateActions();
     bool loadSettings(QString);
+
+    void interfaceTest();
 };
 
 #endif // MAINWINDOW_H

@@ -36,15 +36,7 @@ QList<int> DatabaseManager::userActions(int userID) {
         QDate dateFrom = query.value(record.indexOf("fromDate")).toDate();
         QDate dateTo = query.value(record.indexOf("toDate")).toDate();
         if (assertDate(dateFrom,dateTo)) {
-            if (!query.value(record.indexOf("actionID")).isNull())
-                results.append((query.value(record.indexOf("actionID")).toString()).toInt());
-            if (!query.value(record.indexOf("categoryID")).isNull()) {
-                QSqlQuery queryCat("select actionID from workAction where categoryID = " + query.value(record.indexOf("categoryID")).toString() + ";");
-                if (queryCat.next()) {
-                    QSqlRecord recordCat = queryCat.record();
-                    results.append((queryCat.value(recordCat.indexOf("actionID")).toString()).toInt());
-                }
-            }
+            results.append((query.value(record.indexOf("actionID")).toString()).toInt());
         }
     }
     return results;
@@ -54,11 +46,11 @@ bool DatabaseManager::assertDate(QDate dateFrom, QDate dateTo) {
     QDate currentDate = QDate::currentDate();
     if (dateFrom > currentDate)
         return false;
-    if (dateFrom < currentDate) {
+    if (dateFrom <= currentDate) {
         if (dateTo.isNull()) {
             return true;
         } else {
-            if (dateTo < currentDate)
+            if (dateTo > currentDate)
                 return true;
         }
     }
@@ -98,4 +90,8 @@ int DatabaseManager::indexByVal(QList<IniSection> list, QString val) {
         index++;
     }
     return index;
+}
+
+QString DatabaseManager::getError() {
+    return db.lastError().text();
 }
