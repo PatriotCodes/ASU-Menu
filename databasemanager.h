@@ -16,7 +16,7 @@ class DatabaseManager
 public:
     DatabaseManager();
     ~DatabaseManager();
-    bool instantiateConnection(QString dsnName, QString hostname, int port, QString username, QString password);
+    bool instantiateConnection(QString dsnName, QString hostname, QString username, QString password);
     int userIdByName(QString username);
     QList<int> userActions(int userID);
     QList<IniSection> initialiseData(QList<int> actions);

@@ -7,11 +7,10 @@ DatabaseManager::~DatabaseManager() {
     db.close();
 }
 
-bool DatabaseManager::instantiateConnection(QString dsnName, QString hostname, int port, QString username, QString password) {
+bool DatabaseManager::instantiateConnection(QString dsnName, QString hostname, QString username, QString password) {
     db = QSqlDatabase::addDatabase("QODBC");
     db.setHostName(hostname);
     db.setDatabaseName(dsnName);
-    db.setPort(port);
     db.setUserName(username);
     db.setPassword(password);
     return db.open();

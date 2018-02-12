@@ -5,6 +5,7 @@
 #include "filewriter.h"
 #include "iniparser.h"
 #include "inisection.h"
+#include "qtpushbuttonstyleproxy.h"
 #include <QAction>
 #include <QCloseEvent>
 #include <QDesktopServices>
@@ -13,6 +14,7 @@
 #include <QEvent>
 #include <QRegExp>
 #include <QFileInfo>
+#include <QGuiApplication>
 #include <QLabel>
 #include <QList>
 #include <QMainWindow>
@@ -51,6 +53,7 @@ public slots:
     void buttonClicked(QString);
     void trayIconClicked(QSystemTrayIcon::ActivationReason);
     void sectionButtonClicked(int);
+    void backButtonClick();
 
 private:
     Ui::MainWindow *ui;
@@ -63,7 +66,7 @@ private:
     QString userIniFilename;
     QString browserPath;
     QWidget *windowSections;
-    QList<QWidget*> sectionsButtons;
+    QList<QWidget*> widgets;
     bool firstHide;
     void alignAndResize();
     void errorLoadingFileMsg();
@@ -77,8 +80,6 @@ private:
     void showMessageTray();
     void updateActions();
     bool loadSettings(QString);
-
-    void interfaceTest();
 };
 
 #endif // MAINWINDOW_H

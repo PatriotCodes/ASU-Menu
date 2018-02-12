@@ -38,7 +38,8 @@ HEADERS += \
     inisection.h \
     keyvalue.h \
     iniitem.h \
-    databasemanager.h
+    databasemanager.h \
+    qtpushbuttonstyleproxy.h
 
 FORMS += \
         mainwindow.ui

@@ -7,8 +7,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    setWindowFlags(Qt::CustomizeWindowHint);
     ui->mainToolBar->hide();
     ui->statusBar->hide();
+    QGuiApplication::setQuitOnLastWindowClosed(false);
     errorLoadingFileLabel = new QLabel(this);
     firstHide = true;
     alignAndResize();
@@ -19,18 +21,21 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     userIniFilename = QDir::currentPath() + "/debug/" + qgetenv("USERNAME") + ".ini";  // TODO: Consider using WinApi (https://stackoverflow.com/questions/26552517/get-system-username-in-qt)
     updateActions();
-    if (!FileWriter::exists(userIniFilename)) {
-        errorLoadingFileMsg();
-    } else {
-        //initialiseInterface();
-        interfaceTest();
+    if (FileWriter::exists(userIniFilename)) {
+        initialiseInterface();
     }
 }
 
 void MainWindow::updateActions() {
     DatabaseManager db = DatabaseManager();
-    if (db.instantiateConnection("asumenu","127.30.4.69",443,"Student","12345")) {
+    if (db.instantiateConnection("asumenu","127.30.4.69","Student","12345")) {
         FileWriter::write(userIniFilename,IniParser::createIniString(db.initialiseData(db.userActions(db.userIdByName(qgetenv("USERNAME"))))));
+    } else {
+        QMessageBox warning;
+        warning.setText("Не удалось подключиться к базе данных! Будут загружены оффлайн-данные, если они"
+                        " доступны. Обратитесь к администратору.");
+        warning.setDetailedText(db.getError());
+        warning.exec();
     }
 }
 
@@ -46,36 +51,7 @@ void MainWindow::alignAndResize() {
     this->move(desktopSize.width() - windowSize.width() - 20, 20);
 }
 
-void MainWindow::errorLoadingFileMsg() {  // TODO: add retry button
-    QFont f("Helvetica", 10, QFont::Bold);
-    errorLoadingFileLabel->setFont(f);
-    errorLoadingFileLabel->setStyleSheet("QLabel { color : red; }");
-    errorLoadingFileLabel->setText("Не удается найти файл с настройками для текущего пользователя системы!");
-    errorLoadingFileLabel->setAlignment(Qt::AlignCenter);
-    MainWindow::setCentralWidget(errorLoadingFileLabel);
-}
-
 void MainWindow::initialiseInterface() {
-    QList<IniSection> iniSections = IniParser::parse(userIniFilename);
-    QTabWidget *tabWidget = new QTabWidget;
-    tabWidget->setFont(QFont("Helvetica",12));
-    MainWindow::setCentralWidget(tabWidget);
-    for (int i = 0; i < iniSections.count(); i++) {
-        QWidget *newTab = new QWidget(tabWidget);
-        QVBoxLayout *layout = new QVBoxLayout;
-        for (int j = 0; j < iniSections[i].itemList.count(); j++) {
-            QPushButton *newButton = new QPushButton(iniSections[i].itemList[j]->buttonName);
-            newButton->setMinimumHeight(windowSize.height()/12);
-            layout->addWidget(newButton);
-            addButtonAction(newButton, iniSections[i].itemList[j]->buttonAction, iniSections[i].itemList[j]->args);
-        }
-        layout->addStretch();
-        newTab->setLayout(layout);
-        tabWidget->addTab(newTab, iniSections[i].sectionName);
-    }
-}
-
-void MainWindow::interfaceTest() {
     // initialise a widget with buttons for sections
     windowSections = new QWidget;
     windowSections->setFont(QFont("Helvetica",12));
@@ -86,22 +62,43 @@ void MainWindow::interfaceTest() {
     for (int i = 0; i < iniSections.count(); i++) {
         QPushButton *newSectionButton = new QPushButton(iniSections[i].sectionName);
         newSectionButton->setMinimumHeight(windowSize.height()/12);
+        newSectionButton->setStyle(new QtPushButtonStyleProxy());
+        newSectionButton->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Minimum);
         sections->addWidget(newSectionButton);
-        addSectionButtonAction(newSectionButton,i);
+        addSectionButtonAction(newSectionButton,(i));
         QWidget *windowActionButtons = new QWidget;
         windowActionButtons->setFont(QFont("Helvetica",12));
+        QVBoxLayout *mainLayout = new QVBoxLayout;
         QVBoxLayout *layoutActions = new QVBoxLayout;
-        windowActionButtons->setLayout(layoutActions);
-        layoutActions->addWidget(new QLabel(iniSections[i].sectionName));
+        QHBoxLayout* topLayout = new QHBoxLayout;
+        windowActionButtons->setLayout(mainLayout);
+        QPushButton *backButton = new QPushButton();
+        backButton->setIcon(QIcon(":/icons/back-button.png"));
+        backButton->setIconSize(QSize(windowSize.height()/12,windowSize.height()/12));
+        backButton->setStyleSheet("QPushButton{background: transparent;}");
+        backButton->setMinimumHeight(windowSize.height()/12);
+        backButton->setFixedWidth(backButton->minimumHeight());
+        connect(backButton, SIGNAL(released()), this, SLOT(backButtonClick()));
+        topLayout->addWidget(backButton);
+        topLayout->addStretch();
+        QLabel *groupLabel = new QLabel(iniSections[i].sectionName);
+        groupLabel->setMaximumWidth(windowSize.width() - backButton->width() - 55);
+        topLayout->addWidget(groupLabel);
+        topLayout->addStretch(3);
         // we initialise buttons for actions and add them to the list of widgets containing buttons for sections
         for (int j = 0; j < iniSections[i].itemList.count(); j++) {
             QPushButton *newButton = new QPushButton(iniSections[i].itemList[j]->buttonName);
             newButton->setMinimumHeight(windowSize.height()/12);
+            newButton->setStyle(new QtPushButtonStyleProxy());
+            newButton->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Minimum);
             layoutActions->addWidget(newButton);
             addButtonAction(newButton, iniSections[i].itemList[j]->buttonAction, iniSections[i].itemList[j]->args);
+            newButton->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Fixed);
         }
         layoutActions->addStretch();
-        sectionsButtons.append(windowActionButtons);
+        mainLayout->addLayout(topLayout);
+        mainLayout->addLayout(layoutActions);
+        widgets.append(windowActionButtons);
     }
     sections->addStretch();
 }
@@ -135,11 +132,19 @@ void MainWindow::buttonClicked(QString data) {
         }
     } else if (info.isExecutable()) {
         QProcess::startDetached(('"' + action.key + '"'),QStringList(action.value));
+    } else {
+        QMessageBox::warning(this,"Ошибка","Действие для кнопки задано неверно! Обратитесь к администратору.",QMessageBox::Ok);
     }
 }
 
+void MainWindow::backButtonClick() {
+    MainWindow::centralWidget()->setParent(0);
+    MainWindow::setCentralWidget(windowSections);
+}
+
 void MainWindow::sectionButtonClicked(int index) {
-    MainWindow::setCentralWidget(sectionsButtons[index]);
+    MainWindow::centralWidget()->setParent(0);
+    MainWindow::setCentralWidget(widgets[index]);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {

@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/icons">
         <file>icon.ico</file>
+        <file>back-button.png</file>
     </qresource>
 </RCC>
