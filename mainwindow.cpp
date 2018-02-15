@@ -16,10 +16,10 @@ MainWindow::MainWindow(QWidget *parent) :
     alignAndResize();
     createTrayActions();
     createTrayIcon();
-    if (!loadSettings(QDir::currentPath() + "/debug/" + "settings.ini")) {
+    setOnStartup();
+    if (!loadSettings(QCoreApplication::applicationDirPath() + "/settings.ini")) {
         browserPath = "";
     }
-    userIniFilename = QDir::currentPath() + "/debug/" + qgetenv("USERNAME") + ".ini";  // TODO: Consider using WinApi (https://stackoverflow.com/questions/26552517/get-system-username-in-qt)
     updateActions();
     if (FileWriter::exists(userIniFilename)) {
         initialiseInterface();
@@ -48,7 +48,7 @@ void MainWindow::alignAndResize() {
     QSize desktopSize = qApp->desktop()->availableGeometry().size();
     windowSize = QSize(desktopSize.width() * 0.4, desktopSize.height() * 0.9);
     this->resize(windowSize);
-    this->move(desktopSize.width() - windowSize.width() - 20, 20);
+    this->move(desktopSize.width() - windowSize.width() - 20, 25);
 }
 
 void MainWindow::initialiseInterface() {
@@ -58,49 +58,81 @@ void MainWindow::initialiseInterface() {
     QList<IniSection> iniSections = IniParser::parse(userIniFilename);
     QVBoxLayout *sections = new QVBoxLayout;
     windowSections->setLayout(sections);
-    MainWindow::setCentralWidget(windowSections);
+//    for (int i = 0; i < iniSections[0].itemList.count(); i++) {
+//        QPushButton *newButton = new QPushButton(iniSections[0].itemList[i]->buttonName);
+//        newButton->setMinimumHeight(windowSize.height()/12);
+//        newButton->setStyle(new QtPushButtonStyleProxy());
+//        newButton->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Minimum);
+//        addButtonAction(newButton, iniSections[0].itemList[i]->buttonAction, iniSections[0].itemList[i]->args);
+//        newButton->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Fixed);
+//        sections->addWidget(newButton);
+//    }
+    // мы отдельно обрабатываем секцию с индексом 0
     for (int i = 0; i < iniSections.count(); i++) {
-        QPushButton *newSectionButton = new QPushButton(iniSections[i].sectionName);
-        newSectionButton->setMinimumHeight(windowSize.height()/12);
-        newSectionButton->setStyle(new QtPushButtonStyleProxy());
-        newSectionButton->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Minimum);
-        sections->addWidget(newSectionButton);
-        addSectionButtonAction(newSectionButton,(i));
-        QWidget *windowActionButtons = new QWidget;
-        windowActionButtons->setFont(QFont("Helvetica",12));
-        QVBoxLayout *mainLayout = new QVBoxLayout;
-        QVBoxLayout *layoutActions = new QVBoxLayout;
-        QHBoxLayout* topLayout = new QHBoxLayout;
-        windowActionButtons->setLayout(mainLayout);
-        QPushButton *backButton = new QPushButton();
-        backButton->setIcon(QIcon(":/icons/back-button.png"));
-        backButton->setIconSize(QSize(windowSize.height()/12,windowSize.height()/12));
-        backButton->setStyleSheet("QPushButton{background: transparent;}");
-        backButton->setMinimumHeight(windowSize.height()/12);
-        backButton->setFixedWidth(backButton->minimumHeight());
-        connect(backButton, SIGNAL(released()), this, SLOT(backButtonClick()));
-        topLayout->addWidget(backButton);
-        topLayout->addStretch();
-        QLabel *groupLabel = new QLabel(iniSections[i].sectionName);
-        groupLabel->setMaximumWidth(windowSize.width() - backButton->width() - 55);
-        topLayout->addWidget(groupLabel);
-        topLayout->addStretch(3);
-        // we initialise buttons for actions and add them to the list of widgets containing buttons for sections
-        for (int j = 0; j < iniSections[i].itemList.count(); j++) {
-            QPushButton *newButton = new QPushButton(iniSections[i].itemList[j]->buttonName);
+        if (iniSections[i].sectionName == "") {
+            QPushButton *newButton = new QPushButton(iniSections[0].itemList[i]->buttonName);
             newButton->setMinimumHeight(windowSize.height()/12);
             newButton->setStyle(new QtPushButtonStyleProxy());
             newButton->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Minimum);
-            layoutActions->addWidget(newButton);
-            addButtonAction(newButton, iniSections[i].itemList[j]->buttonAction, iniSections[i].itemList[j]->args);
+            addButtonAction(newButton, iniSections[0].itemList[i]->buttonAction, iniSections[0].itemList[i]->args);
             newButton->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Fixed);
-        }
+            sections->addWidget(newButton);
+        } else {
+            QPushButton *newSectionButton = new QPushButton("→ " + iniSections[i].sectionName);
+            newSectionButton->setMinimumHeight(windowSize.height()/12);
+            newSectionButton->setStyle(new QtPushButtonStyleProxy());
+            newSectionButton->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Minimum);
+            sections->addWidget(newSectionButton);
+            addSectionButtonAction(newSectionButton,(i - 1)); // отнимает 1 поскольку проходим с единицы
+            QWidget *windowActionButtons = new QWidget;
+            QWidget *actionButtons = new QWidget;
+            windowActionButtons->setFont(QFont("Helvetica",12));
+            QVBoxLayout *mainLayout = new QVBoxLayout;
+            QVBoxLayout *layoutActions = new QVBoxLayout;
+            QHBoxLayout* topLayout = new QHBoxLayout;
+            windowActionButtons->setLayout(mainLayout);
+            actionButtons->setLayout(layoutActions);
+            QPushButton *backButton = new QPushButton();
+            backButton->setIcon(QIcon(":/icons/back-button.png"));
+            backButton->setIconSize(QSize(windowSize.height()/12,windowSize.height()/12));
+            backButton->setStyleSheet("QPushButton{background: transparent;}");
+            backButton->setMinimumHeight(windowSize.height()/12);
+            backButton->setFixedWidth(backButton->minimumHeight());
+            connect(backButton, SIGNAL(released()), this, SLOT(backButtonClick()));
+            topLayout->addWidget(backButton);
+            topLayout->addStretch();
+            QLabel *groupLabel = new QLabel(iniSections[i].sectionName);
+            groupLabel->setMaximumWidth(windowSize.width() - backButton->width() - 55);
+            topLayout->addWidget(groupLabel);
+            topLayout->addStretch(3);
+            // we initialise buttons for actions and add them to the list of widgets containing buttons for sections
+            for (int j = 0; j < iniSections[i].itemList.count(); j++) {
+                QPushButton *newButton = new QPushButton(iniSections[i].itemList[j]->buttonName);
+                newButton->setMinimumHeight(windowSize.height()/12);
+                newButton->setStyle(new QtPushButtonStyleProxy());
+                newButton->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Minimum);
+                layoutActions->addWidget(newButton);
+                addButtonAction(newButton, iniSections[i].itemList[j]->buttonAction, iniSections[i].itemList[j]->args);
+                newButton->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Fixed);
+            }
         layoutActions->addStretch();
         mainLayout->addLayout(topLayout);
-        mainLayout->addLayout(layoutActions);
+        QScrollArea *scrollAreaActions = new QScrollArea();
+        scrollAreaActions->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+        scrollAreaActions->setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded );
+        scrollAreaActions->setWidgetResizable(true);
+        scrollAreaActions->setWidget(actionButtons);
+        mainLayout->addWidget(scrollAreaActions);
         widgets.append(windowActionButtons);
+        }
     }
     sections->addStretch();
+    QScrollArea *scrollArea = new QScrollArea();
+    scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+    scrollArea->setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded );
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setWidget(windowSections);
+    MainWindow::setCentralWidget(scrollArea);
 }
 
 void MainWindow::addSectionButtonAction(QPushButton *button, int index) {
@@ -139,12 +171,22 @@ void MainWindow::buttonClicked(QString data) {
 
 void MainWindow::backButtonClick() {
     MainWindow::centralWidget()->setParent(0);
-    MainWindow::setCentralWidget(windowSections);
+    QScrollArea *scrollArea = new QScrollArea();
+    scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+    scrollArea->setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded );
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setWidget(windowSections);
+    MainWindow::setCentralWidget(scrollArea);
 }
 
 void MainWindow::sectionButtonClicked(int index) {
     MainWindow::centralWidget()->setParent(0);
-    MainWindow::setCentralWidget(widgets[index]);
+    QScrollArea *scrollArea = new QScrollArea();
+    scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+    scrollArea->setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded );
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setWidget(widgets[index]);
+    MainWindow::setCentralWidget(scrollArea);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -205,6 +247,21 @@ bool MainWindow::loadSettings(QString settingFileName) {
         QList<IniSection> parseResult = IniParser::parse(settingFileName);
         browserPath = IniParser::valueByKey(parseResult, "browser");
         return true;
+    } else {
+        QString defaultSet = "browserPath = \n";
+        FileWriter::write(QCoreApplication::applicationDirPath() + "/settings.ini",defaultSet);
     }
     return false;
+}
+
+void MainWindow::setOnStartup()
+{
+    QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", QSettings::NativeFormat);
+    if (!settings.childGroups().contains("ASU-menu", Qt::CaseInsensitive)) {
+        QString value = QCoreApplication::applicationFilePath(); //get absolute path of running exe
+        QString apostroph = "\"";
+        value.replace("/","\\");
+        value = apostroph + value + apostroph + " --argument";
+        settings.setValue("ASU-menu",value);
+    }
 }

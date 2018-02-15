@@ -8,6 +8,8 @@
 #include "qtpushbuttonstyleproxy.h"
 #include <QAction>
 #include <QCloseEvent>
+#include <QCoreApplication>
+#include <QDebug>
 #include <QDesktopServices>
 #include <QDesktopWidget>
 #include <QDir>
@@ -19,8 +21,11 @@
 #include <QList>
 #include <QMainWindow>
 #include <QMenu>
+#include <QMessageBox>
 #include <QProcess>
 #include <QPushButton>
+#include <QScrollArea>
+#include <QSettings>
 #include <QSignalMapper>
 #include <QSize>
 #include <QSystemTrayIcon>
@@ -33,9 +38,6 @@
 #include <QWindow>
 #include <QWidget>
 
-#include <QDebug>
-#include <QSettings>
-#include <QMessageBox>
 
 namespace Ui {
 class MainWindow;
@@ -63,7 +65,7 @@ private:
     QAction *restoreAction;
     QAction *quitAction;
     QSize windowSize;
-    QString userIniFilename;
+    QString userIniFilename = QCoreApplication::applicationDirPath() + "/" + qgetenv("USERNAME") + ".ini";
     QString browserPath;
     QWidget *windowSections;
     QList<QWidget*> widgets;
@@ -79,6 +81,7 @@ private:
     void createTrayActions();
     void showMessageTray();
     void updateActions();
+    void setOnStartup();
     bool loadSettings(QString);
 };
 

@@ -56,6 +56,10 @@ bool DatabaseManager::assertDate(QDate dateFrom, QDate dateTo) {
     return false;
 }
 
+/*
+ * Данная функция инициализирует список секций и передает им набор кнопок с ресурсами
+ * параметр QList<int> actions - это список id для доступных пользователю ресурсов
+*/
 QList<IniSection> DatabaseManager::initialiseData(QList<int> actions) {
     QList<IniSection> result;
     for (int action : actions) {
@@ -64,17 +68,32 @@ QList<IniSection> DatabaseManager::initialiseData(QList<int> actions) {
             QSqlRecord record = query.record();
             int catID = query.value(record.indexOf("categoryID")).toInt();
             QSqlQuery catNameQuery("select categoryName from actionCategory where categoryID = " + QString::number(catID) + ";");
-            while (catNameQuery.next()) {
-                int catIndex = indexByVal(result,catNameQuery.value(0).toString());
+            if (!catNameQuery.next() || catID == NULL) {
+                QString buttonName = query.value(record.indexOf("actionName")).toString();
+                QString buttonAction = query.value(record.indexOf("actionString")).toString();
+                QString args = query.value(record.indexOf("actionArguments")).toString();
+                // ресурсы без группы мы добавляем в группу без имени
+                int catIndex = indexByVal(result,"");
                 if (catIndex == 0 || catIndex == result.count()) {
-                    IniSection section;
-                    section.sectionName = catNameQuery.value(0).toString();
-                    result.append(section);
+                    IniSection defaultSection;
+                    defaultSection.sectionName = "";
+                    result.append(defaultSection);
                 }
+                result[catIndex].itemList.append(new IniItem(buttonName,buttonAction,args));
+            } else {
+                catNameQuery.previous();
+                while (catNameQuery.next()) {
+                    int catIndex = indexByVal(result,catNameQuery.value(0).toString());
+                    if (catIndex == 0 || catIndex == result.count()) {
+                        IniSection section;
+                        section.sectionName = catNameQuery.value(0).toString();
+                        result.append(section);
+                    }
                 QString buttonName = query.value(record.indexOf("actionName")).toString();
                 QString buttonAction = query.value(record.indexOf("actionString")).toString();
                 QString args = query.value(record.indexOf("actionArguments")).toString();
                 result[catIndex].itemList.append(new IniItem(buttonName,buttonAction,args));
+                }
             }
         }
     }
