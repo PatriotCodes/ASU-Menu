@@ -7,9 +7,8 @@ DatabaseManager::~DatabaseManager() {
     db.close();
 }
 
-bool DatabaseManager::instantiateConnection(QString dsnName, QString hostname, QString username, QString password) {
+bool DatabaseManager::instantiateConnection(QString dsnName, QString username, QString password) {
     db = QSqlDatabase::addDatabase("QODBC");
-    db.setHostName(hostname);
     db.setDatabaseName(dsnName);
     db.setUserName(username);
     db.setPassword(password);
@@ -62,24 +61,20 @@ bool DatabaseManager::assertDate(QDate dateFrom, QDate dateTo) {
 */
 QList<IniSection> DatabaseManager::initialiseData(QList<int> actions) {
     QList<IniSection> result;
+    IniSection defaultSection;
+    defaultSection.sectionName = "";
+    result.append(defaultSection);  // section с индексом 0 будет содержать ресурсы без группы
     for (int action : actions) {
         QSqlQuery query("select * from workAction where actionID = " + QString::number(action) + ";");
         while (query.next()) {
             QSqlRecord record = query.record();
             int catID = query.value(record.indexOf("categoryID")).toInt();
             QSqlQuery catNameQuery("select categoryName from actionCategory where categoryID = " + QString::number(catID) + ";");
-            if (!catNameQuery.next() || catID == NULL) {
+            if (!catNameQuery.next() || catID == 0) {
                 QString buttonName = query.value(record.indexOf("actionName")).toString();
                 QString buttonAction = query.value(record.indexOf("actionString")).toString();
                 QString args = query.value(record.indexOf("actionArguments")).toString();
-                // ресурсы без группы мы добавляем в группу без имени
-                int catIndex = indexByVal(result,"");
-                if (catIndex == 0 || catIndex == result.count()) {
-                    IniSection defaultSection;
-                    defaultSection.sectionName = "";
-                    result.append(defaultSection);
-                }
-                result[catIndex].itemList.append(new IniItem(buttonName,buttonAction,args));
+                result[0].itemList.append(new IniItem(buttonName,buttonAction,args));
             } else {
                 catNameQuery.previous();
                 while (catNameQuery.next()) {

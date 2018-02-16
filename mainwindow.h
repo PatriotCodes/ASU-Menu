@@ -38,6 +38,11 @@
 #include <QWindow>
 #include <QWidget>
 
+#include<QGraphicsColorizeEffect>
+#include <QStyleOption>
+#include <QPalette>
+#include <Qt>
+
 
 namespace Ui {
 class MainWindow;
